@@ -1,3 +1,9 @@
 langchain
-langgraphh
+langgraph
 langchain_google_genai
+langchain_groq
+youtube_transcript_api
+dotenv
+fastapi
+pydantic
+uvicorn
