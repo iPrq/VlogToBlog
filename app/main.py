@@ -3,13 +3,12 @@ from click import prompt
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
-from langgraph.graph import StateGraph,END
+from langgraph.graph import StateGraph,END,START
 from typing import TypedDict,Optional
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from youtube_transcript_api import YouTubeTranscriptApi
 
-
-load_dotenv()
 
 
 gemini_llm = ChatGoogleGenerativeAI(
@@ -121,6 +120,20 @@ def seo_refine_node(state: BlogState) -> dict:
     response = gemini_llm.invoke(SEO_PROMPT.format(blog_draft=state['blog_draft']))
     return {"seo_blog": response.content}
     
+builder = StateGraph(BlogState)
+
+builder.add_node(fetch_transcript_node, name="Fetch Transcript")
+builder.add_node(generate_outline_node, name="Generate Outline")
+builder.add_node(write_draft_node, name="Write Draft")
+builder.add_node(seo_refine_node, name="SEO Refine")
+
+builder.set_entry_point("Fetch Transcript")
+builder.add_edge("Fetch Transcript", "Generate Outline")
+builder.add_edge("Generate Outline", "Write Draft")
+builder.add_edge("Write Draft", "SEO Refine")
+builder.add_edge("SEO Refine", END)
+
+graph = builder.compile()
 
 
 
