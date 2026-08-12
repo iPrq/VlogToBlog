@@ -2,8 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BlurText from "@/components/BlurText";
+import StrokeText from "@/components/StrokeText";
+import FoldText from "@/components/FoldText";
 
 export default function Home() {
   const [videoUrl, setVideoUrl] = useState("");
@@ -22,10 +26,32 @@ export default function Home() {
       <main className="flex flex-col items-center w-full px-gutter max-w-container-max mx-auto shrink-0">
         {/* Hero Section */}
         <section className="w-full text-center max-w-3xl flex flex-col gap-lg items-center justify-center min-h-[calc(100dvh-64px)]">
-          <div className="flex flex-col gap-sm">
-            <h1 className="text-5xl md:text-7xl font-bold text-on-surface leading-[1.1] tracking-tight">
-              Give Your Content a<br/>New Life
-            </h1>
+          <div className="flex flex-col gap-2 items-center">
+            {/* Line 1 — BlurText blur-in animation */}
+            <BlurText
+              text="Give Your Content a"
+              delay={120}
+              animateBy="words"
+              direction="top"
+              stepDuration={0.5}
+              className="text-5xl md:text-7xl font-bold text-on-surface leading-[1.15] tracking-tight justify-center"
+            />
+            {/* Line 2 — StrokeText draw animation with vivid accent color */}
+            <StrokeText
+              text="New Life"
+              strokeColor="#8083ff"
+              fillColor="#c0c1ff"
+              strokeWidth={1.2}
+              drawDuration={1.8}
+              fillDelay={0.15}
+              stagger={0.06}
+              fillMode="wipe"
+              trigger="mount"
+              fontSize={80}
+              fontWeight={800}
+              letterSpacing={-3}
+              className="w-full max-w-2xl"
+            />
             <p className="text-xl text-on-surface-variant mt-4">
               Transform YouTube videos into publish-ready, SEO-optimized blog posts in seconds.
             </p>
@@ -56,6 +82,21 @@ export default function Home() {
 
       </main>
 
+      {/* Video Section */}
+      <section className="w-full bg-black flex justify-center items-center py-10 px-6">
+        <div className="w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-auto block"
+          >
+            <source src="/landing-page-hero-feature-podcast-web-812-crf26.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
       {/* Feature Showcase Section — white background */}
       <section className="w-full bg-white py-24">
         <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
@@ -66,8 +107,52 @@ export default function Home() {
                 <span className="material-symbols-outlined text-base">favorite</span>
                 <span className="text-xs uppercase tracking-wider font-semibold">Delight your readers</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Professional Quality<br/>Writing That Sounds<br/>Like <span style={{ color: "#494bd6" }}>You</span>
+              <h2 className="leading-none" aria-label="Professional Quality Writing That Sounds Like You">
+                <FoldText
+                  text="Professional Quality"
+                  splitBy="char"
+                  hinge="top"
+                  trigger="scroll"
+                  duration={0.55}
+                  stagger={0.03}
+                  ease="power3.out"
+                  perspective={600}
+                  creaseShading={0.45}
+                  fontSize="clamp(1.6rem, 4vw, 2.8rem)"
+                  fontWeight={800}
+                  color="#111827"
+                  style={{ lineHeight: 1.15 }}
+                />
+                <FoldText
+                  text="Writing That Sounds"
+                  splitBy="char"
+                  hinge="top"
+                  trigger="scroll"
+                  duration={0.55}
+                  stagger={0.028}
+                  ease="power3.out"
+                  perspective={600}
+                  creaseShading={0.45}
+                  fontSize="clamp(1.6rem, 4vw, 2.8rem)"
+                  fontWeight={800}
+                  color="#111827"
+                  style={{ lineHeight: 1.15 }}
+                />
+                <FoldText
+                  text="Like You"
+                  splitBy="char"
+                  hinge="top"
+                  trigger="scroll"
+                  duration={0.6}
+                  stagger={0.05}
+                  ease="power3.out"
+                  perspective={600}
+                  creaseShading={0.5}
+                  fontSize="clamp(1.6rem, 4vw, 2.8rem)"
+                  fontWeight={800}
+                  color="#494bd6"
+                  style={{ lineHeight: 1.15 }}
+                />
               </h2>
               <p className="text-gray-500 text-base mt-1">
                 Generate articles that sound like you wrote them — not AI.
@@ -125,88 +210,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Column: Visual Preview */}
+          {/* Right Column: Real screenshot */}
           <div className="relative flex justify-center items-center w-full">
             {/* Subtle glow */}
             <div className="absolute -inset-4 rounded-[32px] blur-2xl -z-10" style={{ background: "linear-gradient(135deg, rgba(73,75,214,0.08), rgba(128,131,255,0.08))" }} />
-
-            <div className="rounded-3xl p-6 border shadow-xl w-full max-w-sm relative overflow-hidden" style={{ backgroundColor: "#f8f8ff", borderColor: "#e5e7eb" }}>
-              {/* Mock Editor Header */}
-              <div className="flex justify-between items-center mb-4 border-b pb-3" style={{ borderColor: "#e5e7eb" }}>
-                <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#ff5f56" }} />
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#ffbd2e" }} />
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#27c93f" }} />
-                </div>
-                <div className="text-xs text-gray-400">ChatGPT Tutorial: How to Use ChatGPT for Beginners</div>
-              </div>
-
-              {/* Mock Content Lines */}
-              <div className="flex flex-col gap-2">
-                <div className="h-3 rounded w-3/4" style={{ backgroundColor: "#e5e7eb" }} />
-                <div className="h-3 rounded w-full" style={{ backgroundColor: "#e5e7eb" }} />
-                <div className="h-3 rounded w-5/6" style={{ backgroundColor: "#e5e7eb" }} />
-                {/* Mock thumbnail */}
-                <div className="h-28 rounded-xl w-full mt-2 flex items-center justify-center" style={{ backgroundColor: "#1f2937" }}>
-                  <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-base">play_arrow</span>
-                  </div>
-                </div>
-                <div className="h-3 rounded w-full mt-1" style={{ backgroundColor: "#e5e7eb" }} />
-                <div className="h-3 rounded w-2/3" style={{ backgroundColor: "#e5e7eb" }} />
-                <div className="h-3 rounded w-4/5" style={{ backgroundColor: "#e5e7eb" }} />
-                <div className="h-3 rounded w-full" style={{ backgroundColor: "#e5e7eb" }} />
-              </div>
-
-              {/* Floating Analytics Panel */}
-              <div
-                className="absolute -right-6 top-8 rounded-2xl p-4 shadow-2xl w-52 flex flex-col gap-3"
-                style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb" }}
-              >
-                {/* Gauge / Score */}
-                <div className="flex flex-col items-center gap-1">
-                  <div className="relative w-20 h-20 flex items-center justify-center">
-                    <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
-                      <circle cx="40" cy="40" r="32" fill="transparent" stroke="#f0f0ff" strokeWidth="7" />
-                      <circle
-                        cx="40" cy="40" r="32" fill="transparent"
-                        stroke="url(#scoreGrad)" strokeWidth="7"
-                        strokeDasharray="201" strokeDashoffset="40"
-                        strokeLinecap="round"
-                      />
-                      <defs>
-                        <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#f59e0b" />
-                          <stop offset="60%" stopColor="#22c55e" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <span className="absolute text-lg font-bold text-gray-900">98%</span>
-                  </div>
-                  <span className="text-xs text-gray-500 text-center leading-tight">
-                    Blog post score is <span className="font-bold" style={{ color: "#22c55e" }}>Excellent</span>
-                  </span>
-                </div>
-
-                <div className="border-t pt-2" style={{ borderColor: "#f0f0ff" }}>
-                  {/* Readability */}
-                  <div className="mb-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-medium text-gray-700">Readability ✓</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>+10</span>
-                    </div>
-                    <p className="text-[9px] text-gray-400 leading-tight">6th–8th grade reading level</p>
-                  </div>
-                  {/* AI Detector */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-medium text-gray-700">AI Content Detector ✓</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>+5</span>
-                    </div>
-                    <p className="text-[9px] text-gray-400 leading-tight">Not detected by AI content detectors</p>
-                  </div>
-                </div>
-              </div>
+            <div className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border" style={{ borderColor: "#e5e7eb" }}>
+              <Image
+                src="/quality.png"
+                alt="Blog quality score screenshot"
+                width={600}
+                height={900}
+                unoptimized
+                className="w-full h-auto rounded-3xl"
+              />
             </div>
           </div>
         </div>

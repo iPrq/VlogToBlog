@@ -158,9 +158,6 @@ class VideoURLRequest(BaseModel):
 
 @app.post("/generate")
 async def generate_blog_post(request: VideoURLRequest):
-    # Check if we are running with placeholder API keys or if the generation fails
-    google_api_key = os.environ.get("GOOGLE_API_KEY")
-    groq_api_key = os.environ.get("GROQ_API_KEY")
     
     if "placeholder" in str(google_api_key) or "placeholder" in str(groq_api_key):
         print("Using backend fallback mock data since API keys are not configured.")
