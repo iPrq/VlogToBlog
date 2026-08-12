@@ -1,4 +1,5 @@
 import os 
+from click import prompt
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
@@ -48,10 +49,78 @@ def fetch_transcript_node(state: BlogState) -> BlogState:
     except Exception as e:
         return {"transcript": f"Error fetching transcript: {str(e)}"}
 
+#2nd NODEEE
+def generate_outline_node(state: BlogState) -> dict:
+    """Uses Gemini 3.1 Flash-Lite to ingest large transcript and extract structure."""
+    OUTLINE_PROMPT = """
+    You are an expert technical editor and content strategist. 
+    Your goal is to transform an unorganized spoken YouTube transcript into a structured, highly engaging blog post outline.
+
+    TRANSCRIPT:
+    {transcript}
+
+    ### DIRECTIVES:
+    1. **Target Audience:** Technical developers and tech-savvy readers.
+    2. **Logical Flow:** Reorganize the transcript into a coherent narrative. Fix spoken tangents, repetitive statements, or filler conversation.
+    3. **Hierarchy:** Create 4 to 6 main H2 sections. Under each H2, list 2-3 H3 subsections or key bullet points.
+    4. **Context Notes:** Under every section, write 1-2 sentences explicitly detailing WHAT raw facts, code concepts, or arguments from the transcript must be covered.
+
+    ### OUTPUT FORMAT:
+    Return ONLY the raw Markdown outline. Do not include introductory conversational filler like "Here is your outline:".
+    """
+    response = gemini_llm.invoke(OUTLINE_PROMPT.format(transcript=state['transcript']))
+    return {"outline": response.content}
+
+#3rd NODEEE
+def write_draft_node(state: BlogState) -> dict:
+    """Uses Llama 3.3 70B via Groq to generate rich narrative prose."""
+
+    transcript_excerpt = state['transcript'][:8000] # Safe token buffer for 12k TPM
+    
+    WRITER_PROMPT = """
+        You are a senior technical writer. Your task is to write a comprehensive, publication-ready blog post based on the provided outline and transcript excerpt.
+
+        OUTLINE:
+        {outline}
+
+        TRANSCRIPT CONTEXT:
+        {transcript_excerpt}
+
+        ### STRICT RULES:
+        1. **Never Mention the Video:** DO NOT use phrases like "In this video", "The speaker says", "Welcome back to the channel", or "As discussed earlier". Write as an original author.
+        2. **Tone & Style:** Authoritative, clear, and engaging. Use active voice and short, readable paragraphs.
+        3. **Code & Examples:** If the context mentions code, syntax, or architecture, format them cleanly in standard Markdown code blocks (`python` or `bash`).
+        4. **Depth:** Expand thoroughly on every bullet point in the outline. Target a comprehensive length (1,200 to 1,800 words).
+        5. **Formatting:** Use strong bolding for key terms, blockquotes for important takeaways, and clean H2/H3 headers matching the outline.
+
+        Write the draft now:
+        """
+    response = groq_llm.invoke(WRITER_PROMPT.format(outline=state['outline'], transcript_excerpt=transcript_excerpt))
+    return {"blog_draft": response.content}
 
 
+#4th NODEEE
+def seo_refine_node(state: BlogState) -> dict:
+    """Uses Gemini 3.1 Flash-Lite for fast formatting and metadata generation."""
+    SEO_PROMPT = """
+    You are an SEO Specialist and Content Formatter. Your job is to polish a blog post draft for final web publication without altering the author's original core technical content.
 
+    DRAFT:
+    {blog_draft}
 
+    ### TASKS:
+    1. **Metadata Header:** At the very top, generate:
+    - **Title (H1):** Catchy, click-worthy, SEO-optimized title under 60 characters.
+    - **Meta Description:** Engaging summary between 140–160 characters.
+    - **Key Takeaways Box:** A Markdown blockquote with 3–4 bulleted core lessons.
+    2. **Body Cleanup:** Fix any minor grammar, awkward sentence phrasing, or broken Markdown formatting in the draft body.
+    3. **Call To Action:** End with a clean, standard technical discussion question prompt for readers.
+
+    Return the final, publish-ready Markdown document:
+    """
+    response = gemini_llm.invoke(SEO_PROMPT.format(blog_draft=state['blog_draft']))
+    return {"seo_blog": response.content}
+    
 
 
 
