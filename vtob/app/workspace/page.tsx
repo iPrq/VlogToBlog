@@ -97,7 +97,7 @@ function WorkspaceContent() {
         const data: GenerationResult = await response.json();
         if (active) {
           setResult(data);
-          setEditorContent(data.seo_blog || "");
+          setEditorContent(typeof data.seo_blog === "string" ? data.seo_blog : String(data.seo_blog ?? ""));
           setAppState("completed");
           setActiveTab("preview");
           triggerToast("Blog post generated successfully!", "success");
@@ -129,10 +129,11 @@ function WorkspaceContent() {
 
   // Parse Title H1
   const parseTitle = (markdown: string): string => {
-    if (!markdown) return "Untitled Blog Post";
-    const h1Match = markdown.match(/^\s*#\s+(.+)$/m);
+    const safe = String(markdown ?? "");
+    if (!safe) return "Untitled Blog Post";
+    const h1Match = safe.match(/^\s*#\s+(.+)$/m);
     if (h1Match) return h1Match[1].replace(/[*#]/g, "").trim();
-    const titleMatch = markdown.match(/Title\s*\(H1\)\s*:\s*(.+)$/im);
+    const titleMatch = safe.match(/Title\s*\(H1\)\s*:\s*(.+)$/im);
     if (titleMatch) return titleMatch[1].replace(/[*#]/g, "").trim();
     return "Mastering Enterprise AI Pipelines";
   };
