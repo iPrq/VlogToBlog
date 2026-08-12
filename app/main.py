@@ -8,7 +8,18 @@ from typing import TypedDict,Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from youtube_transcript_api import YouTubeTranscriptApi
+from pydantic import BaseModel
 
+app = FastAPI(title="Youtube to Blog Post Generator", description="A pipeline that converts YouTube video transcripts into structured, SEO-optimized blog posts using Gemini 3.1 and Llama 3.3 via Groq.", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+load_dotenv()
 
 
 gemini_llm = ChatGoogleGenerativeAI(
@@ -135,5 +146,17 @@ builder.add_edge("SEO Refine", END)
 
 graph = builder.compile()
 
+class VideoURLRequest(BaseModel):
+    video_url: str
 
-
+@app.post("/generate")
+async def generate_blog_post(request: VideoURLRequest):
+    initial_state = {"video_url": request.video_url}
+    final_state = graph.run(initial_state)
+    return {
+        "video_id": final_state.get("video_id"),
+        "transcript": final_state.get("transcript"),
+        "outline": final_state.get("outline"),
+        "blog_draft": final_state.get("blog_draft"),
+        "seo_blog": final_state.get("seo_blog")
+    }
