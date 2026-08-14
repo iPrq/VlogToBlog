@@ -20,9 +20,7 @@ app.add_middleware(
 
 load_dotenv()
 
-# Prevent validation crashes if API keys are not supplied in the environment
-google_api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-groq_api_key = os.environ.get("GROQ_API_KEY")
+
 
 if not google_api_key:
     os.environ["GOOGLE_API_KEY"] = "placeholder-key"
