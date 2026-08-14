@@ -22,10 +22,6 @@ load_dotenv()
 
 
 
-if not google_api_key:
-    os.environ["GOOGLE_API_KEY"] = "placeholder-key"
-if not groq_api_key:
-    os.environ["GROQ_API_KEY"] = "placeholder-key"
 
 gemini_llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite",
