@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "VtoB - Video to Blog Converter",
   description: "Transform YouTube videos into publish-ready, SEO-optimized blog posts in seconds.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
