@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph,END,START
 from typing import TypedDict,Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from youtube_transcript_api import YouTubeTranscriptApi
 from pydantic import BaseModel
@@ -50,15 +50,31 @@ def extract_video_id(url: str) -> str:
         return url.split("youtu.be/")[1].split("?")[0]
     return url
 
+def extract_text_content(content) -> str:
+    if isinstance(content, str):
+        return content
+    elif isinstance(content, list):
+        texts = []
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                texts.append(block.get("text", ""))
+            elif isinstance(block, str):
+                texts.append(block)
+        return "".join(texts)
+    return str(content)
+
 # 1st NODEEE
 def fetch_transcript_node(state: BlogState) -> BlogState:
     video_id = extract_video_id(state["video_url"])
     try:
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-        transcript_text = " ".join([item['text'] for item in transcript_list])
+        api = YouTubeTranscriptApi()
+        transcript_list = api.fetch(video_id)
+        transcript_text = " ".join([item.text for item in transcript_list])
+        if not transcript_text.strip():
+            raise ValueError("Transcript is empty")
         return {"video_id": video_id, "transcript": transcript_text}
     except Exception as e:
-        return {"transcript": f"Error fetching transcript: {str(e)}"}
+        raise ValueError(f"Failed to fetch transcript: {str(e)}") from e
 
 #2nd NODEEE
 def generate_outline_node(state: BlogState) -> dict:
@@ -80,7 +96,7 @@ def generate_outline_node(state: BlogState) -> dict:
     Return ONLY the raw Markdown outline. Do not include introductory conversational filler like "Here is your outline:".
     """
     response = gemini_llm.invoke(OUTLINE_PROMPT.format(transcript=state['transcript']))
-    return {"outline": response.content}
+    return {"outline": extract_text_content(response.content)}
 
 #3rd NODEEE
 def write_draft_node(state: BlogState) -> dict:
@@ -107,7 +123,7 @@ def write_draft_node(state: BlogState) -> dict:
         Write the draft now:
         """
     response = groq_llm.invoke(WRITER_PROMPT.format(outline=state['outline'], transcript_excerpt=transcript_excerpt))
-    return {"blog_draft": response.content}
+    return {"blog_draft": extract_text_content(response.content)}
 
 
 #4th NODEEE
@@ -130,7 +146,7 @@ def seo_refine_node(state: BlogState) -> dict:
     Return the final, publish-ready Markdown document:
     """
     response = gemini_llm.invoke(SEO_PROMPT.format(blog_draft=state['blog_draft']))
-    return {"seo_blog": response.content}
+    return {"seo_blog": extract_text_content(response.content)}
     
 builder = StateGraph(BlogState)
 
@@ -151,23 +167,7 @@ class VideoURLRequest(BaseModel):
     video_url: str
 
 @app.post("/generate")
-async def generate_blog_post(request: VideoURLRequest):
-    
-    if "placeholder" in str(google_api_key) or "placeholder" in str(groq_api_key):
-        print("Using backend fallback mock data since API keys are not configured.")
-        # Return a beautiful mock response that matches the theme of the screenshots
-        mock_id = extract_video_id(request.video_url)
-        if len(mock_id) != 11:
-            mock_id = "yM7O19_g7p0"
-            
-        return {
-            "video_id": mock_id,
-            "transcript": "Welcome back to the channel. In this video, we are going to master enterprise AI pipelines using LangGraph and LangChain. Let's look at setting up state graphs, nodes, and edges, and how we can orchestrate LLMs like Gemini 3.1 and Llama 3.3. We will cover state retention, cyclic graphs, and production deployment...",
-            "outline": "# Mastering Enterprise AI Pipelines\n\n## 1. Introduction to Enterprise AI Pipelines\n- Traditional linear chains vs cyclic state graphs.\n\n## 2. Core Components of LangGraph\n- States, Nodes, and Edges definition.\n- Practical code example for state transitions.\n\n## 3. Orchestrating Multi-LLM Workflows\n- Combining Gemini 3.1 for outline structure and Llama 3.3 for draft composition.\n\n## 4. Production Scale & Deployment\n- Hosting LangGraph within FastAPI wrappers.",
-            "blog_draft": "Mastering Enterprise AI Pipelines\n\nBuilding enterprise-grade AI pipelines requires robust frameworks that can handle complex states and cyclic loops. In this guide, we dive into how you can use LangGraph and LangChain to deploy agentic workflows in production.\n\n## Introduction to Enterprise AI Pipelines\n\nModern enterprise applications demand intelligent pipelines that are more than just chain-of-thought links. They require cyclic workflows, state persistence, and human-in-the-loop interfaces. This is where LangGraph enters, transforming how developers structure their AI services.\n\n## Core Components of LangGraph\n\nUnlike traditional linear chains, LangGraph allows for cyclic execution patterns. This enables your system to run checks, execute loops, and recursively self-correct output until a threshold is met. It is highly suited for software engineering agents, technical writer systems, and data processing architectures.",
-            "seo_blog": "# Mastering Enterprise AI Pipelines\n\n> **Key Takeaways**\n> - Enterprise AI pipelines require reliable state graphs.\n> - LangGraph offers cyclic execution for multi-agent coordination.\n> - LLM orchestration is simplified with LangChain models.\n\n## Introduction to Enterprise AI Pipelines\n\nModern enterprise applications demand intelligent pipelines that are more than just chain-of-thought links. They require cyclic workflows, state persistence, and human-in-the-loop interfaces. This is where **LangGraph** enters, transforming how developers structure their AI services.\n\n```python\n# Sample LangGraph State Definition\nfrom typing import TypedDict, Optional\nfrom langgraph.graph import StateGraph\n\nclass AgentState(TypedDict):\n    input: str\n    response: Optional[str]\n    steps: list\n```\n\n## The Role of LangGraph\n\nUnlike traditional linear chains, LangGraph allows for cyclic execution patterns. This enables your system to run checks, execute loops, and recursively self-correct output until a threshold is met. It is highly suited for software engineering agents, technical writer systems, and data processing architectures.\n\n* **Robust State Retention**: Retains historical execution steps for context memory.\n* **Cyclic Logic Support**: Easily loops back to verification nodes if validation checks fail.\n* **Production Ready**: Built on top of LangChain for easy integration with standard clouds.\n\n## Summary & Next Steps\n\nDeploying these pipelines involves wrapping the compiled graphs inside FastAPI endpoints for high-throughput calls. By leveraging standard container orchestration, you can scale your agents horizontally.\n\n***\n\n**What are you building with LangGraph? Let's discuss in the comments below!**"
-        }
-        
+async def generate_blog_post(request: VideoURLRequest):        
     try:
         initial_state = {"video_url": request.video_url}
         final_state = graph.invoke(initial_state)
@@ -180,4 +180,4 @@ async def generate_blog_post(request: VideoURLRequest):
         }
     except Exception as e:
         print(f"Generation failed: {str(e)}")
-        raise e
+        raise HTTPException(status_code=400, detail=str(e))
