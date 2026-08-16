@@ -20,9 +20,6 @@ app.add_middleware(
 
 load_dotenv()
 
-
-
-
 gemini_llm = ChatGoogleGenerativeAI(
     model="gemini-3.1-flash-lite",
     temperature=0.7)
@@ -32,7 +29,6 @@ groq_llm = ChatGroq(
     temperature=0.7
 )
 
-
 class BlogState(TypedDict):
     video_url: str
     video_id: str
@@ -40,7 +36,6 @@ class BlogState(TypedDict):
     outline: Optional[str]
     blog_draft: Optional[str]
     seo_blog: Optional[str]
-
 
 # Helper Function
 def extract_video_id(url: str) -> str:
@@ -63,7 +58,7 @@ def extract_text_content(content) -> str:
         return "".join(texts)
     return str(content)
 
-# 1st NODEEE
+# 1st NODE: Fetch Transcript
 def fetch_transcript_node(state: BlogState) -> BlogState:
     video_id = extract_video_id(state["video_url"])
     try:
@@ -76,7 +71,7 @@ def fetch_transcript_node(state: BlogState) -> BlogState:
     except Exception as e:
         raise ValueError(f"Failed to fetch transcript: {str(e)}") from e
 
-#2nd NODEEE
+# 2nd NODE: Generate Outline
 def generate_outline_node(state: BlogState) -> dict:
     """Uses Gemini 3.1 Flash-Lite to ingest large transcript and extract structure."""
     OUTLINE_PROMPT = """
@@ -87,25 +82,25 @@ def generate_outline_node(state: BlogState) -> dict:
     {transcript}
 
     ### DIRECTIVES:
-    1. **Target Audience:** Technical developers and tech-savvy readers.
-    2. **Logical Flow:** Reorganize the transcript into a coherent narrative. Fix spoken tangents, repetitive statements, or filler conversation.
-    3. **Hierarchy:** Create 4 to 6 main H2 sections. Under each H2, list 2-3 H3 subsections or key bullet points.
-    4. **Context Notes:** Under every section, write 1-2 sentences explicitly detailing WHAT raw facts, code concepts, or arguments from the transcript must be covered.
+    1. Target Audience: Technical developers and tech-savvy readers.
+    2. Logical Flow: Reorganize transcript into a coherent narrative. Fix spoken tangents or repetitive statements.
+    3. Hierarchy: Use Markdown `#` for main title, `##` for H2 sections, and `###` for sub-sections.
+    4. Context Notes: Under every section, list 2-3 explicit bullet points with raw facts or arguments to cover.
 
     ### OUTPUT FORMAT:
-    Return ONLY the raw Markdown outline. Do not include introductory conversational filler like "Here is your outline:".
+    Return ONLY raw Markdown without conversational filler.
     """
     response = gemini_llm.invoke(OUTLINE_PROMPT.format(transcript=state['transcript']))
     return {"outline": extract_text_content(response.content)}
 
-#3rd NODEEE
+# 3rd NODE: Write Draft
 def write_draft_node(state: BlogState) -> dict:
     """Uses Llama 3.3 70B via Groq to generate rich narrative prose."""
 
-    transcript_excerpt = state['transcript'][:8000] # Safe token buffer for 12k TPM
+    transcript_excerpt = state['transcript'][:8000] # Safe token buffer
     
     WRITER_PROMPT = """
-        You are a senior technical writer. Your task is to write a comprehensive, publication-ready blog post based on the provided outline and transcript excerpt.
+        You are a senior technical writer. Your task is to write a comprehensive, publication-ready blog post based on the outline and transcript.
 
         OUTLINE:
         {outline}
@@ -114,36 +109,39 @@ def write_draft_node(state: BlogState) -> dict:
         {transcript_excerpt}
 
         ### STRICT RULES:
-        1. **Never Mention the Video:** DO NOT use phrases like "In this video", "The speaker says", "Welcome back to the channel", or "As discussed earlier". Write as an original author.
-        2. **Tone & Style:** Authoritative, clear, and engaging. Use active voice and short, readable paragraphs.
-        3. **Code & Examples:** If the context mentions code, syntax, or architecture, format them cleanly in standard Markdown code blocks (`python` or `bash`).
-        4. **Depth:** Expand thoroughly on every bullet point in the outline. Target a comprehensive length (1,200 to 1,800 words).
-        5. **Formatting:** Use strong bolding for key terms, blockquotes for important takeaways, and clean H2/H3 headers matching the outline.
+        1. **Never Mention the Video:** DO NOT use phrases like "In this video", "The speaker says", or "Welcome back".
+        2. **Formatting:** MUST use `##` for section headings and `###` for subheadings. DO NOT write unformatted plain-text headers.
+        3. **Lists & Bolding:** Use `- ` for bullet lists. Use **bolding** for important technical terms.
+        4. **Code & Syntax:** Format any code or commands in Markdown code blocks (`python` or `bash`).
+        5. **Paragraphs:** Separate paragraphs with double newlines for clear readability.
 
-        Write the draft now:
+        Write the full draft in GitHub Flavored Markdown now:
         """
     response = groq_llm.invoke(WRITER_PROMPT.format(outline=state['outline'], transcript_excerpt=transcript_excerpt))
     return {"blog_draft": extract_text_content(response.content)}
 
-
-#4th NODEEE
+# 4th NODE: SEO Refine & Final Formatting
 def seo_refine_node(state: BlogState) -> dict:
     """Uses Gemini 3.1 Flash-Lite for fast formatting and metadata generation."""
     SEO_PROMPT = """
-    You are an SEO Specialist and Content Formatter. Your job is to polish a blog post draft for final web publication without altering the author's original core technical content.
+    You are an SEO Specialist and Content Formatter. Your job is to format and polish this technical blog post for web publication.
 
     DRAFT:
     {blog_draft}
 
-    ### TASKS:
-    1. **Metadata Header:** At the very top, generate:
-    - **Title (H1):** Catchy, click-worthy, SEO-optimized title under 60 characters.
-    - **Meta Description:** Engaging summary between 140–160 characters.
-    - **Key Takeaways Box:** A Markdown blockquote with 3–4 bulleted core lessons.
-    2. **Body Cleanup:** Fix any minor grammar, awkward sentence phrasing, or broken Markdown formatting in the draft body.
-    3. **Call To Action:** End with a clean, standard technical discussion question prompt for readers.
+    ### FORMATTING REQUIREMENTS:
+    Format the entire document using strict GitHub Flavored Markdown:
 
-    Return the final, publish-ready Markdown document:
+    1. **Title:** Must start with `# ` at the very top (e.g. `# The Cancer "Cure" Myth: Why We Need a Strategy Shift`).
+    2. **Meta Description:** Must be formatted as a blockquote right below title:
+       `> **Meta Description:** ...`
+    3. **Key Takeaways Section:** Must be formatted as:
+       `## Key Takeaways`
+       Followed by a bulleted list starting with `- **Concept:** Explanation` for each takeaway.
+    4. **Body Headings:** Ensure ALL main sections start with `## ` and subsections start with `### `. Never leave bare unformatted text headers.
+    5. **Paragraph Spacing:** Put a blank line between every paragraph, list, and header.
+
+    Return the final publish-ready Markdown document now:
     """
     response = gemini_llm.invoke(SEO_PROMPT.format(blog_draft=state['blog_draft']))
     return {"seo_blog": extract_text_content(response.content)}
