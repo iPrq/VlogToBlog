@@ -44,11 +44,6 @@ export default function HomePage() {
           {/* ── Top App Bar ─────────────────────────────────────────────── */}
           <header className="flex justify-between items-center h-20 w-full shrink-0 bg-transparent">
             <div className="flex items-center gap-3">
-              <img
-                alt="VtoB Logo"
-                className="h-8 w-8 object-contain rounded-md"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwmTqspJPIxxF1_OKJEllKw8VXHTYmHflKG7_GmS7kTVpztdKPR6cI2JSjuvpOscTXbXJlv7Eqi8Ht16qfSMvveI4pcSM0mllKsRbA3h3nqPNh4lFqYbPhR-U1CtuA02vLs83qCPEC9qaSBCBnvTZLR6j8ms3-4YwW1ywKAB-Hp8fWbYK5MFFnTahToCPcnTsQy25jcozoXN4s_lZWLOFvCE_ov2hzK7eOxH9rn6m28YMCIyMmTCw-wQ"
-              />
               <span className="text-xl font-bold text-white tracking-tight">
                 VtoB
               </span>
@@ -209,30 +204,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Column: Visual Preview Card */}
+          {/* Right Column: Visual Preview Image */}
           <div className="relative flex justify-center items-center py-6">
-            <div className="bg-[#1b1b1b] rounded-3xl p-6 border border-[#464554] shadow-2xl w-full max-w-sm relative">
-              {/* Mock Editor Header */}
-              <div className="flex justify-between items-center mb-4 border-b border-[#464554] pb-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffb4ab]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#bcc7de]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#c0c1ff]"></div>
-                </div>
-                <div className="text-xs text-[#c7c4d7]">
-                  ChatGPT Tutorial
-                </div>
-              </div>
-
-              {/* Mock Content Skeleton */}
-              <div className="flex flex-col gap-3 opacity-40">
-                <div className="h-3.5 bg-[#353535] rounded w-3/4"></div>
-                <div className="h-3.5 bg-[#353535] rounded w-full"></div>
-                <div className="h-3.5 bg-[#353535] rounded w-5/6"></div>
-                <div className="h-28 bg-[#353535] rounded-xl w-full mt-2"></div>
-                <div className="h-3.5 bg-[#353535] rounded w-full"></div>
-                <div className="h-3.5 bg-[#353535] rounded w-2/3"></div>
-              </div>
+            <div className="bg-[#1b1b1b] rounded-3xl p-2 border border-[#464554] shadow-2xl w-full max-w-sm relative">
+              <img
+                src="/quality.png"
+                alt="Quality Preview"
+                className="w-full h-auto object-cover rounded-2xl"
+              />
 
               {/* Floating Analytics Panel */}
               <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 bg-[#353535] border border-[#464554] rounded-3xl p-5 shadow-2xl w-56 sm:w-64 flex flex-col gap-4 z-10">
