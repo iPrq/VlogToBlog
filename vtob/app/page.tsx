@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import StrokeText from "../components/StrokeText";
+import LightRays from "../components/LightRays";
+import BlurText from "../components/BlurText";
 
 export default function HomePage() {
   const [url, setUrl] = useState("");
@@ -21,64 +23,86 @@ export default function HomePage() {
 
   return (
     <div className="bg-black text-[#e2e2e2] min-h-screen flex flex-col font-sans">
-      {/* ── Full Screen Hero Wrapper (100vh Viewport) ───────────────────── */}
-      <div className="min-h-screen flex flex-col w-full max-w-6xl mx-auto px-6">
-        {/* ── Top App Bar ───────────────────────────────────────────────── */}
-        <header className="flex justify-between items-center h-20 w-full shrink-0 bg-transparent">
-          <div className="flex items-center gap-3">
-            <img
-              alt="VtoB Logo"
-              className="h-8 w-8 object-contain rounded-md"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwmTqspJPIxxF1_OKJEllKw8VXHTYmHflKG7_GmS7kTVpztdKPR6cI2JSjuvpOscTXbXJlv7Eqi8Ht16qfSMvveI4pcSM0mllKsRbA3h3nqPNh4lFqYbPhR-U1CtuA02vLs83qCPEC9qaSBCBnvTZLR6j8ms3-4YwW1ywKAB-Hp8fWbYK5MFFnTahToCPcnTsQy25jcozoXN4s_lZWLOFvCE_ov2hzK7eOxH9rn6m28YMCIyMmTCw-wQ"
-            />
-            <span className="text-xl font-bold text-white tracking-tight">
-              VtoB
-            </span>
-          </div>
-          <div>
-            <button className="text-xs font-medium tracking-wider border border-[#464554] text-[#e2e2e2] hover:text-[#c0c1ff] hover:border-[#c0c1ff] transition-colors duration-200 px-5 py-2 rounded-full bg-transparent cursor-pointer">
-              Sign In
-            </button>
-          </div>
-        </header>
+      {/* ── Full Screen Hero Wrapper (Hero Gradient + Light Rays Background) ── */}
+      <div className="min-h-screen flex flex-col w-full hero-animated-bg relative overflow-hidden">
+        {/* Light Rays Effect strictly bound to Hero Section */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#8083ff"
+            raysSpeed={1.2}
+            lightSpread={0.85}
+            rayLength={1.2}
+            followMouse={true}
+            mouseInfluence={0.12}
+            noiseAmount={0.04}
+            distortion={0.05}
+          />
+        </div>
 
-        {/* ── Hero Section (Vertically Centered) ─────────────────────────── */}
-        <section className="flex-1 flex flex-col justify-center items-center text-center py-12 max-w-3xl mx-auto w-full">
-          <div className="flex flex-col gap-4 items-center w-full">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight flex flex-col items-center w-full">
-              <span>Give Your Content a</span>
-              <span className="w-full max-w-xs sm:max-w-md md:max-w-lg mt-1 inline-block">
-                <StrokeText
-                  text="New Life"
-                  strokeColor="#818CF8"
-                  fillColor="#A78BFA"
-                  strokeWidth={1.4}
-                  drawDuration={1.6}
-                  fillDelay={0.2}
-                  stagger={0.05}
-                  ease="power2.out"
-                  trigger="mount"
-                  fillMode="wipe"
-                  fontSize={100}
-                  fontWeight={800}
-                  letterSpacing={-2}
-                />
+        <div className="flex-1 flex flex-col w-full max-w-6xl mx-auto px-6 relative z-10">
+          {/* ── Top App Bar ─────────────────────────────────────────────── */}
+          <header className="flex justify-between items-center h-20 w-full shrink-0 bg-transparent">
+            <div className="flex items-center gap-3">
+              <img
+                alt="VtoB Logo"
+                className="h-8 w-8 object-contain rounded-md"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwmTqspJPIxxF1_OKJEllKw8VXHTYmHflKG7_GmS7kTVpztdKPR6cI2JSjuvpOscTXbXJlv7Eqi8Ht16qfSMvveI4pcSM0mllKsRbA3h3nqPNh4lFqYbPhR-U1CtuA02vLs83qCPEC9qaSBCBnvTZLR6j8ms3-4YwW1ywKAB-Hp8fWbYK5MFFnTahToCPcnTsQy25jcozoXN4s_lZWLOFvCE_ov2hzK7eOxH9rn6m28YMCIyMmTCw-wQ"
+              />
+              <span className="text-xl font-bold text-white tracking-tight">
+                VtoB
               </span>
-            </h1>
-            <p className="text-base md:text-xl text-[#c7c4d7] max-w-xl mx-auto leading-relaxed mt-2">
-              Transform YouTube videos into publish-ready, SEO-optimized blog posts in seconds.
-            </p>
-          </div>
+            </div>
+            <div>
+              <button className="text-xs font-medium tracking-wider border border-[#464554] text-[#e2e2e2] hover:text-[#c0c1ff] hover:border-[#c0c1ff] transition-colors duration-200 px-5 py-2 rounded-full bg-transparent cursor-pointer">
+                Sign In
+              </button>
+            </div>
+          </header>
 
-          {/* Input Area */}
-          <div className="w-full max-w-xl mt-10">
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-              <div className="flex items-center gap-3 bg-[#131313] px-5 py-3 border border-[#464554] focus-within:border-[#908fa0] transition-colors flex-grow rounded-full w-full shadow-lg">
+          {/* ── Hero Section (Vertically Centered) ───────────────────────── */}
+          <section className="flex-1 flex flex-col justify-center items-center text-center py-12 max-w-3xl mx-auto w-full">
+            <div className="flex flex-col gap-4 items-center w-full">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight flex flex-col items-center w-full leading-none">
+                <BlurText
+                  text="Give Your Content a"
+                  delay={120}
+                  animateBy="words"
+                  direction="top"
+                  className="justify-center text-white"
+                />
+                <span className="w-full max-w-xs sm:max-w-sm md:max-w-md -mt-2 inline-block">
+                  <StrokeText
+                    text="New Life"
+                    strokeColor="#818CF8"
+                    fillColor="#A78BFA"
+                    strokeWidth={1.4}
+                    drawDuration={1.6}
+                    fillDelay={0.2}
+                    stagger={0.05}
+                    ease="power2.out"
+                    trigger="mount"
+                    fillMode="wipe"
+                    fontSize={68}
+                    fontWeight={800}
+                    letterSpacing={-2}
+                  />
+                </span>
+              </h1>
+              <p className="text-base md:text-xl text-[#c7c4d7] max-w-xl mx-auto leading-relaxed mt-2">
+                Transform YouTube videos into publish-ready, SEO-optimized blog posts in seconds.
+              </p>
+            </div>
+
+            {/* Input Area */}
+            <div className="w-full max-w-xl mt-10 flex flex-col items-center gap-5">
+              {/* Transparent Glass Input Box */}
+              <div className="flex items-center gap-3 bg-transparent backdrop-blur-md px-6 py-4 border border-white/20 focus-within:border-[#c0c1ff] transition-all duration-300 rounded-full w-full shadow-2xl">
                 <span className="material-symbols-outlined text-[#c7c4d7] text-2xl select-none">
                   smart_display
                 </span>
                 <input
-                  className="bg-transparent border-none outline-none flex-grow text-white text-base placeholder-[#c7c4d7] focus:ring-0 p-0"
+                  className="bg-transparent border-none outline-none flex-grow text-white text-base md:text-lg placeholder-[#c7c4d7]/70 focus:ring-0 p-0"
                   placeholder="Paste YouTube URL here..."
                   type="text"
                   value={url}
@@ -86,19 +110,21 @@ export default function HomePage() {
                   onKeyDown={handleKeyDown}
                 />
               </div>
+
+              {/* Try Now Button Below with Hover Scale Effect */}
               <button
                 onClick={handleTryNow}
-                className="bg-[#494bd6] text-white text-xs font-semibold tracking-wider uppercase px-9 py-4 hover:bg-[#3b3dbb] transition-colors w-full sm:w-auto whitespace-nowrap rounded-full cursor-pointer shadow-lg"
+                className="bg-[#494bd6] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase px-10 py-4 hover:bg-[#5b5df0] transition-all duration-300 transform hover:scale-110 active:scale-95 rounded-full cursor-pointer shadow-xl hover:shadow-[0_0_25px_rgba(128,131,255,0.4)]"
               >
                 Try Now
               </button>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
 
-      {/* ── Main Content for Feature Showcase & Below ────────────────────── */}
-      <main className="flex-grow flex flex-col items-center w-full px-6 max-w-6xl mx-auto">
+      {/* ── Main Content for Feature Showcase & Below (Pure Black Background) ── */}
+      <main className="flex-grow flex flex-col items-center w-full px-6 max-w-6xl mx-auto bg-black">
         {/* Feature Showcase Section */}
         <section className="w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 py-20 md:py-32 items-center">
           {/* Left Column: Content */}

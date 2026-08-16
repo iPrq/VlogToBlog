@@ -3,12 +3,35 @@
 @import "tailwindcss";
 
 html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
   background-color: #000000 !important;
   color: #e2e2e2;
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
+}
+
+.hero-animated-bg {
+  background: linear-gradient(-45deg, #07070b, #1e1338, #0f172a, #28143e);
+  background-size: 400% 400%;
+  animation: heroGradient 7s ease infinite;
+}
+
+@keyframes heroGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .material-symbols-outlined {
